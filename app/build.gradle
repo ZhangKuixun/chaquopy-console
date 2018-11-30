@@ -14,6 +14,7 @@ android {
             // If Chaquopy fails to find Python on your build machine, enable and edit the
             // following line to point to a Python 3.4+ executable.
             // buildPython "C:/Python36/python.exe"
+            buildPython "/Library/Frameworks/Python.framework/Versions/3.7/bin/python3.7"
 
             pip {
                 install "six"
@@ -33,7 +34,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "android.arch.lifecycle:extensions:1.1.0"
+    implementation "android.arch.lifecycle:extensions:1.1.1"
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     testImplementation 'android.arch.core:core-testing:1.1.0'

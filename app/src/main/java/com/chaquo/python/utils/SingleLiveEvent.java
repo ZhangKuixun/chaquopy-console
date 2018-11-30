@@ -22,7 +22,6 @@ import android.arch.lifecycle.Observer;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -48,7 +47,7 @@ public class SingleLiveEvent<T> extends MutableLiveData<T> {
     public void observe(@NonNull LifecycleOwner owner, @NonNull Observer<T> observer) {
         if (mObserver != null) {
             throw new IllegalStateException
-                ("Cannot register multiple observers on a SingleLiveEvent");
+                    ("Cannot register multiple observers on a SingleLiveEvent");
         }
 
         mObserver = observer;
@@ -66,7 +65,7 @@ public class SingleLiveEvent<T> extends MutableLiveData<T> {
     @Override
     public void removeObserver(@NonNull Observer<T> observer) {
         if (observer == mObserverWrapper ||  // Will happen when lifecycle owner is destroyed.
-            observer == mObserver) {
+                observer == mObserver) {
             super.removeObserver(mObserverWrapper);
             mObserver = mObserverWrapper = null;
         }

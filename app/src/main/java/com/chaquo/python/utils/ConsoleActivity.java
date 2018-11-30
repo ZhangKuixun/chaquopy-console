@@ -16,7 +16,7 @@ import android.view.inputmethod.*;
 import android.widget.*;
 
 public abstract class ConsoleActivity extends AppCompatActivity
-implements ViewTreeObserver.OnGlobalLayoutListener, ViewTreeObserver.OnScrollChangedListener {
+        implements ViewTreeObserver.OnGlobalLayoutListener, ViewTreeObserver.OnScrollChangedListener {
 
     private EditText etInput;
     private ScrollView svOutput;
@@ -26,14 +26,16 @@ implements ViewTreeObserver.OnGlobalLayoutListener, ViewTreeObserver.OnScrollCha
     enum Scroll {
         TOP, BOTTOM
     }
+
     private Scroll scrollRequest;
-    
+
     public static class ConsoleModel extends ViewModel {
         boolean pendingNewline = false;  // Prevent empty line at bottom of screen
         int scrollChar = 0;              // Character offset of the top visible line.
         int scrollAdjust = 0;            // Pixels by which that line is scrolled above the top
-                                         //   (prevents movement when keyboard hidden/shown).
+        //   (prevents movement when keyboard hidden/shown).
     }
+
     private ConsoleModel consoleModel;
 
     protected Task task;
@@ -55,8 +57,12 @@ implements ViewTreeObserver.OnGlobalLayoutListener, ViewTreeObserver.OnScrollCha
 
         // Strip formatting from pasted text.
         etInput.addTextChangedListener(new TextWatcher() {
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
             public void afterTextChanged(Editable e) {
                 for (CharacterStyle cs : e.getSpans(0, e.length(), CharacterStyle.class)) {
                     e.removeSpan(cs);
@@ -68,7 +74,7 @@ implements ViewTreeObserver.OnGlobalLayoutListener, ViewTreeObserver.OnScrollCha
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE ||
-                    (event != null && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                        (event != null && event.getAction() == KeyEvent.ACTION_DOWN)) {
                     String text = etInput.getText().toString() + "\n";
                     etInput.setText("");
                     output(span(text, new StyleSpan(Typeface.BOLD)));
@@ -81,7 +87,8 @@ implements ViewTreeObserver.OnGlobalLayoutListener, ViewTreeObserver.OnScrollCha
         });
 
         task.inputEnabled.observe(this, new Observer<Boolean>() {
-            @Override public void onChanged(@Nullable Boolean enabled) {
+            @Override
+            public void onChanged(@Nullable Boolean enabled) {
                 InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
                 if (enabled) {
                     etInput.setVisibility(View.VISIBLE);
@@ -115,14 +122,16 @@ implements ViewTreeObserver.OnGlobalLayoutListener, ViewTreeObserver.OnScrollCha
         // we maintain the scrolled-to-bottom state.
     }
 
-    @Override protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
         // Don't restore the UI state unless we have the non-UI state as well.
         if (task.getState() != Thread.State.NEW) {
             super.onRestoreInstanceState(savedInstanceState);
         }
     }
 
-    @Override protected void onResume() {
+    @Override
+    protected void onResume() {
         super.onResume();
         // Needs to be in onResume rather than onStart because onRestoreInstanceState runs
         // between them.
@@ -131,14 +140,16 @@ implements ViewTreeObserver.OnGlobalLayoutListener, ViewTreeObserver.OnScrollCha
         }
     }
 
-    @Override protected void onPause() {
+    @Override
+    protected void onPause() {
         super.onPause();
         saveScroll();  // Necessary to save bottom position in case we've never scrolled.
     }
 
     // This callback is run after onResume, after each layout pass. If a view's size, position
     // or visibility has changed, the new values will be visible here.
-    @Override public void onGlobalLayout() {
+    @Override
+    public void onGlobalLayout() {
         if (outputWidth != svOutput.getWidth() || outputHeight != svOutput.getHeight()) {
             // Can't register this listener in onCreate on API level 15
             // (https://stackoverflow.com/a/35054919).
@@ -170,7 +181,8 @@ implements ViewTreeObserver.OnGlobalLayoutListener, ViewTreeObserver.OnScrollCha
         }
     }
 
-   @Override public void onScrollChanged() {
+    @Override
+    public void onScrollChanged() {
         saveScroll();
     }
 
@@ -204,7 +216,8 @@ implements ViewTreeObserver.OnGlobalLayoutListener, ViewTreeObserver.OnScrollCha
 
         task.output.removeObservers(this);
         task.output.observe(this, new Observer<CharSequence>() {
-            @Override public void onChanged(@Nullable CharSequence text) {
+            @Override
+            public void onChanged(@Nullable CharSequence text) {
                 output(text);
             }
         });
@@ -212,7 +225,7 @@ implements ViewTreeObserver.OnGlobalLayoutListener, ViewTreeObserver.OnScrollCha
 
     private boolean isScrolledToBottom() {
         int visibleHeight = (svOutput.getHeight() - svOutput.getPaddingTop() -
-                             svOutput.getPaddingBottom());
+                svOutput.getPaddingBottom());
         int maxScroll = Math.max(0, tvOutput.getHeight() - visibleHeight);
         return (svOutput.getScrollY() >= maxScroll);
     }
@@ -224,7 +237,8 @@ implements ViewTreeObserver.OnGlobalLayoutListener, ViewTreeObserver.OnScrollCha
         return true;
     }
 
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == resId("id", "menu_top")) {
             scrollTo(Scroll.TOP);
@@ -308,9 +322,11 @@ implements ViewTreeObserver.OnGlobalLayoutListener, ViewTreeObserver.OnScrollCha
         }
     }
 
-    /** Make this file easy to copy to other apps by avoiding direct "R" references. (It would be
+    /**
+     * Make this file easy to copy to other apps by avoiding direct "R" references. (It would be
      * better to do this by distributing it along with its resources in an AAR, but Chaquoopy
-     * doesn't support getting Python code from an AAR yet.)*/
+     * doesn't support getting Python code from an AAR yet.)
+     */
     public static int resId(Context context, String type, String name) {
         Resources resources = context.getResources();
         return resources.getIdentifier(name, type, context.getApplicationInfo().packageName);
@@ -325,10 +341,18 @@ implements ViewTreeObserver.OnGlobalLayoutListener, ViewTreeObserver.OnScrollCha
     public static abstract class Task extends AndroidViewModel {
 
         private Thread.State state = Thread.State.NEW;
+        public MutableLiveData<Boolean> inputEnabled = new MutableLiveData<>();
+        public BufferedLiveEvent<CharSequence> output = new BufferedLiveEvent<>();
+
+        public Task(Application app) {
+            super(app);
+            inputEnabled.setValue(false);
+        }
 
         public void start() {
             startThread(new Runnable() {
-                @Override public void run() {
+                @Override
+                public void run() {
                     try {
                         Task.this.run();
                         output(spanColor("[Finished]", resId("color", "console_meta")));
@@ -345,26 +369,26 @@ implements ViewTreeObserver.OnGlobalLayoutListener, ViewTreeObserver.OnScrollCha
             new Thread(runnable).start();
         }
 
-        public Thread.State getState() { return state; }
-
-        public MutableLiveData<Boolean> inputEnabled = new MutableLiveData<>();
-        public BufferedLiveEvent<CharSequence> output = new BufferedLiveEvent<>();
-
-        public Task(Application app) {
-            super(app);
-            inputEnabled.setValue(false);
+        public Thread.State getState() {
+            return state;
         }
 
-        /** Override this method to provide the task's implementation. It will be called on a
-         *  background thread. */
+        /**
+         * Override this method to provide the task's implementation. It will be called on a
+         * background thread.
+         */
         public abstract void run();
 
-        /** Called on the UI thread each time the user enters some input, A trailing newline is
-         * always included. The base class implementation does nothing. */
-        public void onInput(String text) {}
+        /**
+         * Called on the UI thread each time the user enters some input, A trailing newline is
+         * always included. The base class implementation does nothing.
+         */
+        public void onInput(String text) {
+        }
 
         public void output(final CharSequence text) {
-            if (text.length() == 0) return;
+            if (text.length() == 0)
+                return;
             output.postValue(text);
         }
 

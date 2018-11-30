@@ -1,11 +1,13 @@
 package com.chaquo.python.console;
 
 import android.app.*;
+
 import com.chaquo.python.utils.*;
 
 public class MainActivity extends PythonConsoleActivity {
 
-    @Override protected Class<? extends Task> getTaskClass() {
+    @Override
+    protected Class<? extends Task> getTaskClass() {
         return Task.class;
     }
 
@@ -14,7 +16,8 @@ public class MainActivity extends PythonConsoleActivity {
             super(app);
         }
 
-        @Override public void run() {
+        @Override
+        public void run() {
             py.getModule("main").callAttr("main");
         }
     }
